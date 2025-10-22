@@ -363,7 +363,8 @@ mutation DeleteAlbum($userId: String!, $albumId: String!) {
 **Query Variables:**
 ```json
 {
-  "id": "1"
+  "userId": "<uuid>",
+  "albumId": "<uuid>"
 }
 ```
 
