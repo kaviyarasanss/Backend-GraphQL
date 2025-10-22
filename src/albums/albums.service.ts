@@ -103,20 +103,34 @@ export class AlbumsService {
     }
   }
 
-  async delete(id: string) {
-    this.logger.log(`Deleting album with ID=${id}`);
-    const album = await Album.query().findById(id);
+  async delete(userId: string, albumId: string) {
+    this.logger.log(`Deleting album with ID=${albumId} for userId=${userId}`);
+    const user = await User.query().findById(userId);
+    if (!user) {
+      this.logger.warn(`User with ID=${userId} not found`);
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const album = await Album.query()
+      .where({
+        id: albumId,
+        user_id: userId,
+      })
+      .first();
+
     if (!album) {
-      this.logger.warn(`Album with ID=${id} not found`);
-      throw new NotFoundException(`Album with ID ${id} not found`);
+      this.logger.warn(
+        `Album with ID=${albumId} not found for userId=${userId}`
+      );
+      throw new NotFoundException("No such album exists for this user");
     }
 
     try {
-      await Album.query().deleteById(id);
+      await Album.query().deleteById(albumId);
       return true;
     } catch (err) {
-      this.logger.error('Error deleting album: ' + err?.message );
-      throw new BadRequestException('Failed to delete album');
+      this.logger.error("Error deleting album: " + err?.message);
+      throw new BadRequestException("Failed to delete album");
     }
   }
 }

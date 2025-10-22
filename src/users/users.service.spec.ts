@@ -4,7 +4,14 @@ import { User } from '../db/models/users.model';
 import { mockUsers, mockUser, mockCreateUserInput } from './__mocks__/users.mock';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-jest.mock('../db/models/users.model');
+jest.mock('../db/models/users.model', () => ({
+  User: {
+    query: jest.fn(),
+    knex: jest.fn(() => ({
+      raw: jest.fn(),
+    })),
+  },
+}));
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -15,6 +22,7 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -26,50 +34,71 @@ describe('UsersService', () => {
       const page = 1;
       const pageSize = 5;
       const expectedUsers = {
-        data: mockUsers,
+        data: mockUsers.map(user => ({
+          ...user,
+          total_count: mockUsers.length,
+        })),
         total: mockUsers.length,
         page,
         pageSize,
       };
 
-      const query = User.query();
-      jest.spyOn(query, 'withGraphFetched').mockResolvedValue(mockUsers as any);
-      jest.spyOn(query, 'resultSize').mockResolvedValue(mockUsers.length);
+      const mockUserQuery = {
+        select: jest.fn().mockReturnThis(),
+        withGraphFetched: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(expectedUsers.data),
+      };
+      (User.query as jest.Mock).mockReturnValue(mockUserQuery);
 
       const result = await service.findAll(page, pageSize);
-      expect(result).toEqual(expectedUsers);
+      expect(result.data).toEqual(expectedUsers.data);
+      expect(result.total).toEqual(expectedUsers.total);
     });
   });
 
-  describe('findOne', () => {
+  describe('findOne', ()=> {
     it('should return a single user', async () => {
-      const query = User.query();
-      const findByIdSpy = jest.spyOn(query, 'findById').mockReturnThis();
-      jest.spyOn(query, 'withGraphFetched').mockResolvedValue(mockUser as any);
+      const mockUserQuery = {
+        findById: jest.fn().mockReturnThis(),
+        withGraphFetched: jest.fn().mockResolvedValue(mockUser),
+      };
+      (User.query as jest.Mock).mockReturnValue(mockUserQuery);
+
       const result = await service.findOne('1');
       expect(result).toEqual(mockUser);
     });
 
     it('should throw a NotFoundException if the user is not found', async () => {
-      const query = User.query();
-      const findByIdSpy = jest.spyOn(query, 'findById').mockReturnThis();
-      jest.spyOn(query, 'withGraphFetched').mockResolvedValue(null);
+      const mockUserQuery = {
+        findById: jest.fn().mockReturnThis(),
+        withGraphFetched: jest.fn().mockResolvedValue(null),
+      };
+      (User.query as jest.Mock).mockReturnValue(mockUserQuery);
       await expect(service.findOne('1')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('create', () => {
     it('should create a new user', async () => {
-      const query = User.query();
-      jest.spyOn(query, 'insert').mockResolvedValue(mockUser as any);
-      jest.spyOn(query, 'first').mockResolvedValue(null);
+      const mockUserQuery = {
+        insert: jest.fn().mockResolvedValue(mockUser),
+        where: jest.fn().mockReturnThis(),
+        orWhere: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(null),
+      };
+      (User.query as jest.Mock).mockReturnValue(mockUserQuery);
       const result = await service.create(mockCreateUserInput);
       expect(result).toEqual(mockUser);
     });
 
     it('should throw a BadRequestException if the user already exists', async () => {
-      const query = User.query();
-      jest.spyOn(query, 'first').mockResolvedValue(mockUser as any);
+      const mockUserQuery = {
+        where: jest.fn().mockReturnThis(),
+        orWhere: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(mockUser),
+      };
+      (User.query as jest.Mock).mockReturnValue(mockUserQuery);
       await expect(service.create(mockCreateUserInput)).rejects.toThrow(BadRequestException);
     });
   });

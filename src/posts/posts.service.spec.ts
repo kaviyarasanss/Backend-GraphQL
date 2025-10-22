@@ -6,7 +6,14 @@ import { mockPosts, mockPost, mockCreatePostInput } from './__mocks__/posts.mock
 import { mockUser } from '../users/__mocks__/users.mock';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-jest.mock('../db/models/posts.model');
+jest.mock('../db/models/posts.model', () => ({
+  Post: {
+    query: jest.fn(),
+    knex: jest.fn(() => ({
+      raw: jest.fn(),
+    })),
+  },
+}));
 jest.mock('../db/models/users.model');
 
 describe('PostsService', () => {
@@ -18,6 +25,7 @@ describe('PostsService', () => {
     }).compile();
 
     service = module.get<PostsService>(PostsService);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -40,10 +48,12 @@ describe('PostsService', () => {
         page,
         pageSize,
       };
-      const postQuery = Post.query();
-      jest.spyOn(postQuery, 'offset').mockReturnThis();
-      jest.spyOn(postQuery, 'limit').mockResolvedValue(mockPosts as any);
-      jest.spyOn(postQuery, 'resultSize').mockResolvedValue(mockPosts.length);
+      const mockPostQuery = {
+        select: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockPosts.map(post => ({...post, total_count: mockPosts.length}))),
+      };
+      jest.spyOn(Post, 'query').mockReturnValue(mockPostQuery as any);
 
       const result = await service.findPosts(undefined, page, pageSize);
       expect(result).toEqual(expectedPosts);
@@ -65,13 +75,18 @@ describe('PostsService', () => {
         page,
         pageSize,
       };
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(mockUser as any);
-      const postQuery = Post.query();
-      jest.spyOn(postQuery, 'where').mockReturnThis();
-      jest.spyOn(postQuery, 'offset').mockReturnThis();
-      jest.spyOn(postQuery, 'limit').mockResolvedValue(mockPosts as any);
-      jest.spyOn(postQuery, 'resultSize').mockResolvedValue(mockPosts.length);
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
+
+      const mockPostQuery = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockPosts.map(post => ({...post, total_count: mockPosts.length}))),
+      };
+      jest.spyOn(Post, 'query').mockReturnValue(mockPostQuery as any);
       const result = await service.findPosts(userId, page, pageSize);
       expect(result).toEqual(expectedPosts);
     });
@@ -92,18 +107,25 @@ describe('PostsService', () => {
         content: mockPost.content,
         caption: mockPost.caption,
       };
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(mockUser as any);
-      const postQuery = Post.query();
-      jest.spyOn(postQuery, 'insert').mockResolvedValue(mockPost as any);
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
+
+      const mockPostQuery = {
+        insert: jest.fn().mockResolvedValue(mockPost),
+      };
+      (Post.query as jest.Mock).mockReturnValue(mockPostQuery);
 
       const result = await service.create(mockCreatePostInput);
       expect(result).toEqual(expectedPost);
     });
 
     it('should throw a NotFoundException if the user is not found', async () => {
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(null);
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(null),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
       await expect(service.create(mockCreatePostInput)).rejects.toThrow(NotFoundException);
     });
   });

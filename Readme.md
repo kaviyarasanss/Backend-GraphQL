@@ -355,8 +355,8 @@ mutation UpdateAlbum($input: UpdateAlbumInput!) {
 
 #### Mutation: Delete Album
 ```graphql
-mutation DeleteAlbum($id: String!) {
-  deleteAlbum(id: $id)
+mutation DeleteAlbum($userId: String!, $albumId: String!) {
+  deleteAlbum(userId: $userId, albumId: $albumId)
 }
 ```
 
