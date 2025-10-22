@@ -142,14 +142,14 @@ describe('AlbumsService', () => {
       const albumQuery = Album.query();
       jest.spyOn(albumQuery, 'findById').mockResolvedValue(mockAlbum as any);
       jest.spyOn(albumQuery, 'deleteById').mockResolvedValue(1);
-      const result = await service.delete('1');
+      const result = await service.delete('1','1');
       expect(result).toEqual(true);
     });
 
     it('should throw a NotFoundException if the album is not found', async () => {
       const albumQuery = Album.query();
       jest.spyOn(albumQuery, 'findById').mockResolvedValue(null);
-      await expect(service.delete('1')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('1','1')).rejects.toThrow(NotFoundException);
     });
   });
 });

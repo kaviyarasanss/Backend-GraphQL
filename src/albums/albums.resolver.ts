@@ -47,8 +47,11 @@ export class AlbumsResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteAlbum(@Args('id', ParseUUIDPipe) id: string) {
-    this.logger.log(`Deleting album with ID=${id}`);
-    return this.albumsService.delete(id);
+  async deleteAlbum(
+    @Args("userId", ParseUUIDPipe) userId: string,
+    @Args("albumId", ParseUUIDPipe) albumId: string
+  ) {
+    this.logger.log(`Deleting album with ID=${albumId} for userId=${userId}`);
+    return this.albumsService.delete(userId, albumId);
   }
 }
