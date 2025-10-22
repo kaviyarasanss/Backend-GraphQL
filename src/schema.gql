@@ -1,0 +1,92 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PostType {
+  id: ID!
+  userId: String!
+  title: String!
+  content: String!
+  caption: String
+}
+
+type PaginatedPosts {
+  data: [PostType!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type AlbumType {
+  id: ID!
+  userId: String!
+  name: String!
+  description: String
+  genre: String
+}
+
+type PaginatedAlbums {
+  data: [AlbumType!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type UserType {
+  id: ID!
+  name: String!
+  username: String!
+  email: String!
+  posts: [PostType!]
+  albums: [AlbumType!]
+}
+
+type PaginatedUsers {
+  data: [UserType!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type Query {
+  users(page: Int, pageSize: Int): PaginatedUsers!
+  user(id: String!): UserType!
+  posts(userId: String, page: Int, pageSize: Int): PaginatedPosts!
+  albums(userId: String, page: Int, pageSize: Int): PaginatedAlbums!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): UserType!
+  createPost(input: CreatePostInput!): PostType!
+  createAlbum(input: CreateAlbumInput!): AlbumType!
+  updateAlbum(input: UpdateAlbumInput!): AlbumType!
+  deleteAlbum(id: String!): Boolean!
+}
+
+input CreateUserInput {
+  name: String!
+  username: String!
+  email: String!
+}
+
+input CreatePostInput {
+  userId: String!
+  title: String!
+  content: String!
+  caption: String
+}
+
+input CreateAlbumInput {
+  userId: String!
+  name: String!
+  description: String
+  genre: String
+}
+
+input UpdateAlbumInput {
+  userId: String
+  name: String
+  description: String
+  genre: String
+  id: String!
+}
