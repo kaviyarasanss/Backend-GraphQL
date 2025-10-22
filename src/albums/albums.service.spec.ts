@@ -6,7 +6,14 @@ import { mockAlbums, mockAlbum, mockCreateAlbumInput } from './__mocks__/albums.
 import { mockUser } from '../users/__mocks__/users.mock';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
-jest.mock('../db/models/albums.model');
+jest.mock('../db/models/albums.model', () => ({
+  Album: {
+    query: jest.fn(),
+    knex: jest.fn(() => ({
+      raw: jest.fn(),
+    })),
+  },
+}));
 jest.mock('../db/models/users.model');
 
 describe('AlbumsService', () => {
@@ -18,6 +25,7 @@ describe('AlbumsService', () => {
     }).compile();
 
     service = module.get<AlbumsService>(AlbumsService);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -33,17 +41,19 @@ describe('AlbumsService', () => {
           id: album.id,
           userId: album.userId,
           name: album.name,
-          description: null,
-          genre: null,
+          description: album.description,
+          genre: album.genre,
         })),
         total: mockAlbums.length,
         page,
         pageSize,
       };
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'offset').mockReturnThis();
-      jest.spyOn(albumQuery, 'limit').mockResolvedValue(mockAlbums.map(album => ({...album, user_id: album.userId} as any)));
-      jest.spyOn(albumQuery, 'resultSize').mockResolvedValue(mockAlbums.length);
+      const mockAlbumQuery = {
+        select: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockAlbums.map(album => ({...album, user_id: album.userId, total_count: mockAlbums.length}))),
+      };
+      jest.spyOn(Album, 'query').mockReturnValue(mockAlbumQuery as any);
 
 
       const result = await service.findAlbums(undefined, page, pageSize);
@@ -59,20 +69,20 @@ describe('AlbumsService', () => {
           id: album.id,
           userId: album.userId,
           name: album.name,
-          description: null,
-          genre: null,
+          description: album.description,
+          genre: album.genre,
         })),
         total: mockAlbums.length,
         page,
         pageSize,
       };
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(mockUser as any);
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'where').mockReturnThis();
-      jest.spyOn(albumQuery, 'offset').mockReturnThis();
-      jest.spyOn(albumQuery, 'limit').mockResolvedValue(mockAlbums.map(album => ({...album, user_id: album.userId} as any)));
-      jest.spyOn(albumQuery, 'resultSize').mockResolvedValue(mockAlbums.length);
+      const mockAlbumQuery = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockAlbums.map(album => ({...album, user_id: album.userId, total_count: mockAlbums.length}))),
+      };
+      jest.spyOn(Album, 'query').mockReturnValue(mockAlbumQuery as any);
       const result = await service.findAlbums(userId, page, pageSize);
       expect(result).toEqual(expectedAlbums);
     });
@@ -94,21 +104,31 @@ describe('AlbumsService', () => {
         id: mockAlbum.id,
         userId: mockAlbum.userId,
         name: mockAlbum.name,
-        description: undefined,
-        genre: undefined,
+        description: mockAlbum.description,
+        genre: mockAlbum.genre,
       };
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(mockUser as any);
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'insert').mockResolvedValue({id: mockAlbum.id, user_id: mockAlbum.userId, name: mockAlbum.name, description: undefined, genre: undefined} as any);
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
+
+      const mockAlbumQuery = {
+        insert: jest.fn().mockResolvedValue({
+          ...mockAlbum,
+          user_id: mockAlbum.userId,
+        }),
+      };
+      (Album.query as jest.Mock).mockReturnValue(mockAlbumQuery);
 
       const result = await service.create(createAlbumInput);
       expect(result).toEqual(expectedAlbum);
     });
 
     it('should throw a NotFoundException if the user is not found', async () => {
-      const userQuery = User.query();
-      jest.spyOn(userQuery, 'findById').mockResolvedValue(null);
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(null),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
       await expect(service.create({userId: '1', name: 'test'})).rejects.toThrow(NotFoundException);
     });
   });
@@ -122,34 +142,57 @@ describe('AlbumsService', () => {
       const updatedAlbum = {
         ...mockAlbum,
         name: 'new name',
+        userId: mockAlbum.userId,
       };
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'findById').mockResolvedValue(mockAlbum as any);
-      jest.spyOn(albumQuery, 'patchAndFetchById').mockResolvedValue(updatedAlbum as any);
+      const mockAlbumQuery = {
+        findById: jest.fn().mockResolvedValue(mockAlbum),
+        patchAndFetchById: jest.fn().mockResolvedValue(updatedAlbum),
+      };
+      (Album.query as jest.Mock).mockReturnValue(mockAlbumQuery);
       const result = await service.update(updateAlbumInput);
       expect(result.name).toEqual('new name');
     });
 
     it('should throw a NotFoundException if the album is not found', async () => {
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'findById').mockResolvedValue(null);
+      const mockAlbumQuery = {
+        findById: jest.fn().mockResolvedValue(null),
+      };
+      (Album.query as jest.Mock).mockReturnValue(mockAlbumQuery);
       await expect(service.update({id: '1', name: 'test'})).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
     it('should delete an album', async () => {
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'findById').mockResolvedValue(mockAlbum as any);
-      jest.spyOn(albumQuery, 'deleteById').mockResolvedValue(1);
-      const result = await service.delete('1','1');
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
+  
+      const mockAlbumQuery = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(mockAlbum),
+        deleteById: jest.fn().mockResolvedValue(1),
+      };
+      jest.spyOn(Album, 'query').mockReturnValue(mockAlbumQuery as any);
+  
+      const result = await service.delete('1', '1');
       expect(result).toEqual(true);
     });
-
-    it('should throw a NotFoundException if the album is not found', async () => {
-      const albumQuery = Album.query();
-      jest.spyOn(albumQuery, 'findById').mockResolvedValue(null);
-      await expect(service.delete('1','1')).rejects.toThrow(NotFoundException);
+  
+    it('should throw a NotFoundException if the album is not found for the user', async () => {
+      const mockUserQuery = {
+        findById: jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(User, 'query').mockReturnValue(mockUserQuery as any);
+  
+      const mockAlbumQuery = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(null),
+      };
+      jest.spyOn(Album, 'query').mockReturnValue(mockAlbumQuery as any);
+  
+      await expect(service.delete('1', '1')).rejects.toThrow(NotFoundException);
     });
   });
 });

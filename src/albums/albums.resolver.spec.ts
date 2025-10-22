@@ -65,8 +65,9 @@ describe('AlbumsResolver', () => {
   describe('deleteAlbum', () => {
     it('should call the albums service delete method', async () => {
       const id = '1';
-      await resolver.deleteAlbum(id,'1');
-      expect(service.delete).toHaveBeenCalledWith(id);
+      const userId = '1';
+      await resolver.deleteAlbum(id, userId);
+      expect(service.delete).toHaveBeenCalledWith(userId, id);
     });
   });
 });
