@@ -92,7 +92,9 @@ The GraphQL Playground provides an interactive interface for testing queries and
 
 ### User Module
 
-#### Query: Fetch Paginated Users
+#### Query: Fetch All Users (Paginated)
+
+**With Variables:**
 ```graphql
 query GetUsers($page: Int, $pageSize: Int) {
   users(page: $page, pageSize: $pageSize) {
@@ -104,10 +106,14 @@ query GetUsers($page: Int, $pageSize: Int) {
       posts {
         id
         title
+        content
+        caption
       }
       albums {
         id
         name
+        description
+        genre
       }
     }
     total
@@ -120,12 +126,45 @@ query GetUsers($page: Int, $pageSize: Int) {
 **Query Variables:**
 ```json
 {
-  "page": 1,
-  "pageSize": 10
+  "page": 2,
+  "pageSize": 2
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetUsers {
+  users(page: 2, pageSize: 2) {
+    data {
+      id
+      name
+      username
+      email
+      posts {
+        id
+        title
+        content
+        caption
+      }
+      albums {
+        id
+        name
+        description
+        genre
+      }
+    }
+    total
+    page
+    pageSize
+  }
+}
+```
+
+---
+
 #### Query: Fetch Single User by ID
+
+**With Variables:**
 ```graphql
 query GetUser($id: String!) {
   user(id: $id) {
@@ -137,11 +176,13 @@ query GetUser($id: String!) {
       id
       title
       content
+      caption
     }
     albums {
       id
       name
       description
+      genre
     }
   }
 }
@@ -150,11 +191,39 @@ query GetUser($id: String!) {
 **Query Variables:**
 ```json
 {
-  "id": "1"
+  "id": "8eecea99-eacc-47ff-adb1-1e532e03ceee"
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetUser {
+  user(id: "8eecea99-eacc-47ff-adb1-1e532e03ceee") {
+    id
+    name
+    username
+    email
+    posts {
+      id
+      title
+      content
+      caption
+    }
+    albums {
+      id
+      name
+      genre
+      description
+    }
+  }
+}
+```
+
+---
+
 #### Mutation: Create User
+
+**With Variables:**
 ```graphql
 mutation CreateUser($input: CreateUserInput!) {
   createUser(input: $input) {
@@ -186,9 +255,29 @@ input CreateUserInput {
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+mutation CreateUser {
+  createUser(input: {
+    name: "New name",
+    username: "user",
+    email: "not@gmail.com"
+  }) {
+    id
+    name
+    username
+    email
+  }
+}
+```
+
+---
+
 ### Posts Module
 
-#### Query: Fetch Paginated Posts
+#### Query: Fetch All Posts of a Specific User
+
+**With Variables:**
 ```graphql
 query GetPosts($userId: String, $page: Int, $pageSize: Int) {
   posts(userId: $userId, page: $page, pageSize: $pageSize) {
@@ -206,24 +295,86 @@ query GetPosts($userId: String, $page: Int, $pageSize: Int) {
 }
 ```
 
-**Query Variables (All Posts):**
+**Query Variables:**
 ```json
 {
-  "page": 1,
+  "userId": "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+  "page": 2,
+  "pageSize": 1
+}
+```
+
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetPosts {
+  posts(userId: "8eecea99-eacc-47ff-adb1-1e532e03ceee", page: 2, pageSize: 1) {
+    data {
+      id
+      userId
+      title
+      content
+      caption
+    }
+    total
+    page
+    pageSize
+  }
+}
+```
+
+---
+
+#### Query: Fetch All Posts (All Users)
+
+**With Variables:**
+```graphql
+query GetPosts($page: Int, $pageSize: Int) {
+  posts(page: $page, pageSize: $pageSize) {
+    data {
+      id
+      userId
+      title
+      content
+      caption
+    }
+    total
+    page
+    pageSize
+  }
+}
+```
+
+**Query Variables:**
+```json
+{
+  "page": 2,
   "pageSize": 10
 }
 ```
 
-**Query Variables (Posts by User):**
-```json
-{
-  "userId": "1",
-  "page": 1,
-  "pageSize": 10
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetPosts {
+  posts(page: 2, pageSize: 10) {
+    data {
+      id
+      userId
+      title
+      content
+      caption
+    }
+    total
+    page
+    pageSize
+  }
 }
 ```
 
-#### Mutation: Create Post
+---
+
+#### Mutation: Create Post for a User
+
+**With Variables:**
 ```graphql
 mutation CreatePost($input: CreatePostInput!) {
   createPost(input: $input) {
@@ -250,7 +401,7 @@ input CreatePostInput {
 ```json
 {
   "input": {
-    "userId": "1",
+    "userId": "8eecea99-eacc-47ff-adb1-1e532e03ceee",
     "title": "My First Post",
     "content": "This is the content of my first post",
     "caption": "An exciting new beginning"
@@ -258,9 +409,31 @@ input CreatePostInput {
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+mutation CreatePost {
+  createPost(input: {
+    userId: "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+    title: "post",
+    content: "content",
+    caption: "123"
+  }) {
+    id
+    userId
+    title
+    content
+    caption
+  }
+}
+```
+
+---
+
 ### Albums Module
 
-#### Query: Fetch Paginated Albums
+#### Query: Fetch Albums of a Specific User
+
+**With Variables:**
 ```graphql
 query GetAlbums($userId: String, $page: Int, $pageSize: Int) {
   albums(userId: $userId, page: $page, pageSize: $pageSize) {
@@ -278,7 +451,56 @@ query GetAlbums($userId: String, $page: Int, $pageSize: Int) {
 }
 ```
 
-**Query Variables (All Albums):**
+**Query Variables:**
+```json
+{
+  "userId": "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetAlbums {
+  albums(userId: "8eecea99-eacc-47ff-adb1-1e532e03ceee", page: 1) {
+    data {
+      id
+      userId
+      name
+      description
+      genre
+    }
+    total
+    page
+    pageSize
+  }
+}
+```
+
+---
+
+#### Query: Fetch All Albums (All Users)
+
+**With Variables:**
+```graphql
+query GetAlbums($page: Int, $pageSize: Int) {
+  albums(page: $page, pageSize: $pageSize) {
+    data {
+      id
+      userId
+      name
+      description
+      genre
+    }
+    total
+    page
+    pageSize
+  }
+}
+```
+
+**Query Variables:**
 ```json
 {
   "page": 1,
@@ -286,16 +508,29 @@ query GetAlbums($userId: String, $page: Int, $pageSize: Int) {
 }
 ```
 
-**Query Variables (Albums by User):**
-```json
-{
-  "userId": "1",
-  "page": 1,
-  "pageSize": 10
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+query GetAlbums {
+  albums(page: 1) {
+    data {
+      id
+      userId
+      name
+      description
+      genre
+    }
+    total
+    page
+    pageSize
+  }
 }
 ```
 
-#### Mutation: Create Album
+---
+
+#### Mutation: Create Album for a User
+
+**With Variables:**
 ```graphql
 mutation CreateAlbum($input: CreateAlbumInput!) {
   createAlbum(input: $input) {
@@ -322,7 +557,7 @@ input CreateAlbumInput {
 ```json
 {
   "input": {
-    "userId": "1",
+    "userId": "8eecea99-eacc-47ff-adb1-1e532e03ceee",
     "name": "Summer Vibes",
     "description": "A collection of summer hits",
     "genre": "Pop"
@@ -330,7 +565,29 @@ input CreateAlbumInput {
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+mutation CreateAlbum {
+  createAlbum(input: {
+    userId: "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+    name: "aaa",
+    genre: "aaa",
+    description: "aaa"
+  }) {
+    id
+    userId
+    name
+    description
+    genre
+  }
+}
+```
+
+---
+
 #### Mutation: Update Album
+
+**With Variables:**
 ```graphql
 mutation UpdateAlbum($input: UpdateAlbumInput!) {
   updateAlbum(input: $input) {
@@ -347,15 +604,33 @@ mutation UpdateAlbum($input: UpdateAlbumInput!) {
 ```json
 {
   "input": {
-    "id": "1",
-    "name": "Summer Vibes 2024",
-    "description": "Updated collection of summer hits",
-    "genre": "Pop"
+    "id": "e05e42cd-db71-47d3-a994-7c541bbfc8b3",
+    "genre": "ddd"
   }
 }
 ```
 
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+mutation UpdateAlbum {
+  updateAlbum(input: {
+    id: "e05e42cd-db71-47d3-a994-7c541bbfc8b3",
+    genre: "ddd"
+  }) {
+    id
+    userId
+    name
+    description
+    genre
+  }
+}
+```
+
+---
+
 #### Mutation: Delete Album
+
+**With Variables:**
 ```graphql
 mutation DeleteAlbum($userId: String!, $albumId: String!) {
   deleteAlbum(userId: $userId, albumId: $albumId)
@@ -365,10 +640,22 @@ mutation DeleteAlbum($userId: String!, $albumId: String!) {
 **Query Variables:**
 ```json
 {
-  "userId": "<uuid>",
-  "albumId": "<uuid>"
+  "userId": "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+  "albumId": "9c2e1975-f315-421d-88d2-69a5af3025d3"
 }
 ```
+
+**Direct Example (Copy & Paste to Playground):**
+```graphql
+mutation DeleteAlbum {
+  deleteAlbum(
+    userId: "8eecea99-eacc-47ff-adb1-1e532e03ceee",
+    albumId: "9c2e1975-f315-421d-88d2-69a5af3025d3"
+  )
+}
+```
+
+---
 
 ## Libraries Used
 
@@ -412,6 +699,7 @@ graphql-task/
 ├── Readme.md
 └── tsconfig.json
 ```
+
 ## Testing
 
 Run the test suite:
