@@ -3,6 +3,7 @@
 A robust GraphQL API built with NestJS, PostgreSQL, and Apollo Server for managing users, albums, and posts.
 
 ## Table of Contents
+- [Getting Started](#getting-started)
 - [Installation](#installation)
 - [Database Setup](#database-setup)
 - [Running the Application](#running-the-application)
@@ -11,6 +12,22 @@ A robust GraphQL API built with NestJS, PostgreSQL, and Apollo Server for managi
 - [Testing](#testing)
 - [Libraries Used](#libraries-used)
 - [Project Structure](#project-structure)
+
+## Getting Started
+
+### Clone the Repository
+
+First, clone the project repository to your local machine:
+
+```bash
+git clone https://github.com/kaviyarasanss/Backend-GraphQL.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd Backend-GraphQL
+```
 
 ## Installation
 
