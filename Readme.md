@@ -24,7 +24,17 @@ npm install
 
 ### 1. Configure Environment Variables
 
-Create a `.env` file in the root directory with the following configuration:
+**Create a `.env` file at the root of your project directory.**
+
+If a `.env` file already exists:
+- Open the existing `.env` file and update the database credentials with your own values
+
+If no `.env` file exists:
+- Create a new file named `.env` in the root folder
+- Copy and paste the template below
+- Replace the placeholder values with your actual database credentials
+
+**Environment Variables Template:**
 
 ```env
 # Database Configuration
@@ -37,8 +47,31 @@ DB_NAME=your_database_name
 # Application Configuration
 PORT=3000
 
-NODE_ENV=<env>
+# Environment
+NODE_ENV=development
 ```
+
+**Example with actual values:**
+
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=mySecurePassword123
+DB_NAME=graphql_api_db
+
+# Application Configuration
+PORT=3000
+
+# Environment
+NODE_ENV=development
+```
+
+**For cloud databases (e.g., Supabase, AWS RDS):**
+- Replace `DB_HOST` with your cloud database URL
+- Update `DB_PORT` if using a custom port
+- Use the credentials provided by your cloud database service
 
 ### 2. Database Initialization
 
@@ -86,7 +119,9 @@ npm run seed:run {filename}
    npm install
    ```
 
-2. **Start the Application** in development mode:
+2. **Verify your `.env` file** is properly configured with your database credentials.
+
+3. **Start the Application** in development mode:
    ```bash
    npm run start:dev
    ```
