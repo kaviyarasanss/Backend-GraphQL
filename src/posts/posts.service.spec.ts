@@ -4,7 +4,7 @@ import { Post } from '../db/models/posts.model';
 import { User } from '../db/models/users.model';
 import { mockPosts, mockPost, mockCreatePostInput } from './__mocks__/posts.mock';
 import { mockUser } from '../users/__mocks__/users.mock';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 jest.mock('../db/models/posts.model', () => ({
   Post: {

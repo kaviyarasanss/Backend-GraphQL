@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlbumsResolver } from './albums.resolver';
 import { AlbumsService } from './albums.service';
-import { mockAlbums, mockAlbum, mockCreateAlbumInput } from './__mocks__/albums.mock';
+import { mockAlbums, mockAlbum } from './__mocks__/albums.mock';
 
 describe('AlbumsResolver', () => {
   let resolver: AlbumsResolver;

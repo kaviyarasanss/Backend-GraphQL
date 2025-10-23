@@ -405,7 +405,6 @@ graphql-task/
 │   ├── app.module.ts
 │   ├── main.ts
 │   └── schema.gql
-├── test/
 ├── .env
 ├── .gitignore
 ├── knexfile.ts

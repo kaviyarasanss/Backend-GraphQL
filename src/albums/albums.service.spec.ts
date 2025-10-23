@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AlbumsService } from './albums.service';
 import { Album } from '../db/models/albums.model';
 import { User } from '../db/models/users.model';
-import { mockAlbums, mockAlbum, mockCreateAlbumInput } from './__mocks__/albums.mock';
+import { mockAlbums, mockAlbum } from './__mocks__/albums.mock';
 import { mockUser } from '../users/__mocks__/users.mock';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 jest.mock('../db/models/albums.model', () => ({
   Album: {

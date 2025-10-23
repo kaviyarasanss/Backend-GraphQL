@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
-import { User } from '../db/models/users.model'; // Objection.js model
+import { User } from '../db/models/users.model';
 import { CreateUserInput } from './users.types';
 
 @Injectable()

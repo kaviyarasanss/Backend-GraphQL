@@ -16,8 +16,3 @@ export const mockAlbums = [
 ];
 
 export const mockAlbum = mockAlbums[0];
-
-export const mockCreateAlbumInput = {
-  userId: '1',
-  name: 'quidem molestiae enim',
-};
