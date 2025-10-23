@@ -34,6 +34,8 @@ DB_NAME=your_database_name
 
 # Application Configuration
 PORT=3000
+
+NODE_ENV=<env>
 ```
 
 ### 2. Run Migrations
@@ -42,10 +44,10 @@ Create and run database migrations to set up the tables:
 
 ```bash
 # Create a new migration file
-npx knex --knexfile knexfile.ts migrate:make {filename}
+npm run migrate:make {migrationName}
 
-# Run all pending migrations
-npx knex --knexfile knexfile.ts migrate:up {filename}
+# Run a specific migratin file
+npm run migrate:up:single -- {filename}
 ```
 
 **Note:** Migration files are provided in the `migrations/` folder in the repository. Run them in order to create the necessary database schema.
@@ -56,10 +58,10 @@ Populate the database with initial data using seed files:
 
 ```bash
 # Create a new seed file
-npx knex --knexfile knexfile.ts seed:make {filename}
+npm run seed:make {filename}
 
 # Run a specific seed file
-npx knex --knexfile knexfile.ts seed:run --specific={filename}
+npm run seed:run {filename}
 ```
 
 **Note:** Seed files are provided in the `seed/` folder in the repository. Use these to populate your database with sample data.
@@ -393,9 +395,7 @@ mutation DeleteAlbum($userId: String!, $albumId: String!) {
 ```
 graphql-task/
 ├── dist/
-├── migrations/
 ├── node_modules/
-├── seeds/
 ├── src/
 │   ├── albums/
 │   ├── db/
@@ -407,7 +407,6 @@ graphql-task/
 │   └── schema.gql
 ├── .env
 ├── .gitignore
-├── knexfile.ts
 ├── package-lock.json
 ├── package.json
 ├── Readme.md

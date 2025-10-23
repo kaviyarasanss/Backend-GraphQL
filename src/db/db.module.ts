@@ -1,7 +1,7 @@
 import { Module, Global } from "@nestjs/common";
 import knex from "knex";
 import { Model } from "objection";
-import KnexConfig from "../../knexfile";
+import KnexConfig from "./knexfile";
 
 @Global()
 @Module({
@@ -9,10 +9,12 @@ import KnexConfig from "../../knexfile";
     {
       provide: "KNEX",
       useFactory: async () => {
-        const config = KnexConfig.development;
-        const knexFile = knex(config);
-        Model.knex(knexFile);
-        return knexFile;
+        const env = process.env.NODE_ENV || "development";
+        const config = KnexConfig[env];
+        if (!config) throw new Error(`Knex config for "${env}" not found`);
+        const knexInstance = knex(config);
+        Model.knex(knexInstance);
+        return knexInstance;
       },
     },
   ],
