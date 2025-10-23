@@ -8,7 +8,9 @@ A robust GraphQL API built with NestJS, PostgreSQL, and Apollo Server for managi
 - [Running the Application](#running-the-application)
 - [GraphQL Playground](#graphql-playground)
 - [Example Queries and Mutations](#example-queries-and-mutations)
+- [Testing](#testing)
 - [Libraries Used](#libraries-used)
+- [Project Structure](#project-structure)
 
 ## Installation
 
@@ -38,7 +40,18 @@ PORT=3000
 NODE_ENV=<env>
 ```
 
-### 2. Run Migrations
+### 2. Database Initialization
+
+**If using a cloud database (e.g., Supabase):**
+- No need to run migrations or seed files
+- Ensure your cloud database is already set up and populated
+- Update the `.env` file with your cloud database credentials
+
+**If using a local PostgreSQL database:**
+
+You need to run migrations and seed files to set up and populate your database.
+
+#### Run Migrations
 
 Create and run database migrations to set up the tables:
 
@@ -46,13 +59,13 @@ Create and run database migrations to set up the tables:
 # Create a new migration file
 npm run migrate:make {migrationName}
 
-# Run a specific migratin file
+# Run a specific migration file
 npm run migrate:up:single -- {filename}
 ```
 
 **Note:** Migration files are provided in the `migrations/` folder in the repository. Run them in order to create the necessary database schema.
 
-### 3. Run Seed Files
+#### Run Seed Files
 
 Populate the database with initial data using seed files:
 
@@ -68,11 +81,15 @@ npm run seed:run {filename}
 
 ## Running the Application
 
-Start the application in development mode:
+1. **Install Dependencies** (if not already done):
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run start:dev
-```
+2. **Start the Application** in development mode:
+   ```bash
+   npm run start:dev
+   ```
 
 The server will start on the port specified in your `.env` file (default: 3000).
 
@@ -657,6 +674,37 @@ mutation DeleteAlbum {
 
 ---
 
+## Testing
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+### Test Results
+
+The project includes comprehensive test coverage for all modules:
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       34 passed, 34 total
+Snapshots:   0 total
+Time:        5.442 s, estimated 9 s
+```
+
+**Test Files:**
+- ✅ `src/albums/albums.service.spec.ts`
+- ✅ `src/albums/albums.resolver.spec.ts`
+- ✅ `src/users/users.resolver.spec.ts`
+- ✅ `src/posts/posts.resolver.spec.ts`
+- ✅ `src/posts/posts.service.spec.ts`
+- ✅ `src/users/users.service.spec.ts`
+
+All tests pass successfully, ensuring the reliability and correctness of the API endpoints and business logic.
+
+---
+
 ## Libraries Used
 
 ### Core Framework
@@ -699,34 +747,5 @@ graphql-task/
 ├── Readme.md
 └── tsconfig.json
 ```
-
-## Testing
-
-Run the test suite:
-
-```bash
-npm test
-```
-
-### Test Results
-
-The project includes comprehensive test coverage for all modules:
-
-```
-Test Suites: 6 passed, 6 total
-Tests:       34 passed, 34 total
-Snapshots:   0 total
-Time:        5.442 s, estimated 9 s
-```
-
-**Test Files:**
-- ✅ `src/albums/albums.service.spec.ts`
-- ✅ `src/albums/albums.resolver.spec.ts`
-- ✅ `src/users/users.resolver.spec.ts`
-- ✅ `src/posts/posts.resolver.spec.ts`
-- ✅ `src/posts/posts.service.spec.ts`
-- ✅ `src/users/users.service.spec.ts`
-
-All tests pass successfully, ensuring the reliability and correctness of the API endpoints and business logic.
 
 ---
